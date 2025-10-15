@@ -2,9 +2,9 @@
 
 A **handwritten digit recognition** web application built with:
 
-- **TensorFlow** (CNN trained on MNIST)  
-- **FastAPI** backend  
-- **React 18 + Vite + Tailwind 4** frontend  
+- **TensorFlow** (CNN trained on MNIST)
+- **FastAPI** backend
+- **React 18 + Vite + Tailwind 4** frontend
 
 The app allows users to upload images and get real-time digit predictions.
 
@@ -12,12 +12,12 @@ The app allows users to upload images and get real-time digit predictions.
 
 ## 🛠 Features
 
-- CNN model trained on MNIST dataset  
-- FastAPI backend serving predictions  
-- React 18 frontend with Tailwind 4 styling  
-- Image upload with **preview** before prediction  
-- Returns **predicted digit** and **confidence score**  
-- CORS enabled for easy frontend-backend communication  
+- CNN model trained on MNIST dataset
+- FastAPI backend serving predictions
+- React 18 frontend with Tailwind 4 styling
+- Image upload with **preview** before prediction
+- Returns **predicted digit** and **confidence score**
+- CORS enabled for easy frontend-backend communication
 
 ---
 
@@ -81,9 +81,9 @@ opencv-python
 uvicorn app:app --reload
 ```
 
-- Runs at `http://127.0.0.1:8000`  
-- `/predict` endpoint accepts uploaded images  
-- `/predict_raw` endpoint accepts raw MNIST byte arrays  
+- Runs at `http://127.0.0.1:8000`
+- `/predict` endpoint accepts uploaded images
+- `/predict_raw` endpoint accepts raw MNIST byte arrays
 
 ---
 
@@ -102,15 +102,15 @@ npm install
 npm run dev
 ```
 
-- Runs at `http://localhost:5173` (Vite default)  
-- Upload images to get predictions from the backend  
+- Runs at `http://localhost:5173` (Vite default)
+- Upload images to get predictions from the backend
 
 ### 3. Notes
 
 - Frontend is **component-based**:
-  - `ImageUploader.jsx` → handles file upload & prediction  
-  - `PredictionResult.jsx` → shows predicted digit  
-- Tailwind 4 provides styling via **Vite configuration** (`vite.config.js`)  
+  - `ImageUploader.jsx` → handles file upload & prediction
+  - `PredictionResult.jsx` → shows predicted digit
+- Tailwind 4 provides styling via **Vite configuration** (`vite.config.js`)
 
 ---
 
@@ -118,8 +118,8 @@ npm run dev
 
 ### POST `/predict`
 
-- Upload image (`PNG`, `JPEG`, `BMP`)  
-- Optional query param: `raw=true` for raw MNIST arrays  
+- Upload image (`PNG`, `JPEG`, `BMP`)
+- Optional query param: `raw=true` for raw MNIST arrays
 
 **Example using Python:**
 
@@ -145,7 +145,7 @@ print(response.json())
 
 ### POST `/predict_raw`
 
-- Accepts raw MNIST 28x28 array bytes in the request body  
+- Accepts raw MNIST 28x28 array bytes in the request body
 
 ```python
 import requests
@@ -161,16 +161,16 @@ print(response.json())
 
 ## ⚠️ Notes
 
-- Model is trained only on MNIST; real-world images may require **data augmentation** or **EMNIST**  
-- Backend preprocessing handles resizing, normalization, and optional color inversion  
+- Model is trained only on MNIST; real-world images may require **data augmentation** or **EMNIST**
+- Backend preprocessing handles resizing, normalization, and optional color inversion
 
 ---
 
 ## 📚 References
 
-- [MNIST Dataset](http://yann.lecun.com/exdb/mnist/)  
-- [TensorFlow CNN Tutorial](https://www.tensorflow.org/tutorials/quickstart/beginner)  
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)  
-- [React 18](https://reactjs.org/)  
-- [Vite](https://vitejs.dev/)  
-- [Tailwind 4](https://tailwi
+- [MNIST Dataset](http://yann.lecun.com/exdb/mnist/)
+- [TensorFlow CNN Tutorial](https://www.tensorflow.org/tutorials/quickstart/beginner)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [React 18](https://reactjs.org/)
+- [Vite](https://vitejs.dev/)
+- [Tailwind 4](https://tailwindcss.com/)
