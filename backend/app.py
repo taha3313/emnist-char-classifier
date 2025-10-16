@@ -60,21 +60,3 @@ async def predict_character(file: UploadFile = File(...), raw: bool = False):
     predicted_char = emnist_labels[pred_idx] if pred_idx < len(emnist_labels) else "?"
 
     return {"prediction": predicted_char, "index": pred_idx, "confidence": confidence}
-
-
-@app.post("/predict_raw")
-async def predict_raw(request: Request):
-    """Handle direct raw 28x28 bytes array input"""
-    body = await request.body()
-    img_array = np.frombuffer(body, dtype=np.uint8).reshape((28, 28)).astype("float32") / 255.0
-    img_array = np.rot90(img_array, k=-1)
-    img_array = np.fliplr(img_array)
-    img_array = img_array.reshape((1, 28, 28, 1))
-
-    predictions = model.predict(img_array)
-    pred_idx = int(np.argmax(predictions))
-    confidence = float(np.max(predictions))
-
-    predicted_char = emnist_labels[pred_idx] if pred_idx < len(emnist_labels) else "?"
-
-    return {"prediction": predicted_char, "index": pred_idx, "confidence": confidence}
