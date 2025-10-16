@@ -15,39 +15,66 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = tf.keras.models.load_model("model/mnist_cnn.h5")
+# Load trained EMNIST model
+model = tf.keras.models.load_model("model/emnist_cnn.h5")
+
+# Mapping for EMNIST "byclass" labels (0–61)
+# Reference: https://www.nist.gov/itl/products-and-services/emnist-dataset
+emnist_labels = [
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',  # digits
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y', 'Z',                      # uppercase letters
+    'a', 'b', 'd', 'e', 'f', 'g', 'h', 'n', 'q', 'r',
+    't', 'y'                                           # lowercase subset
+]
 
 def preprocess_image(file_bytes, is_raw=False):
+    """Convert uploaded file or raw bytes into normalized 28x28 grayscale tensor"""
     if is_raw:
-        # Raw MNIST array bytes (shape 28x28)
-        img_array = np.frombuffer(file_bytes, dtype=np.uint8).reshape((28,28)).astype("float32") / 255.0
-        img_array = img_array.reshape((1,28,28,1))
-        return img_array
+        img_array = np.frombuffer(file_bytes, dtype=np.uint8).reshape((28, 28)).astype("float32") / 255.0
     else:
-        # Image files (PNG/BMP/JPEG)
         image = Image.open(io.BytesIO(file_bytes)).convert("L")
-        if image.size != (28,28):
-            image = image.resize((28,28))
+        if image.size != (28, 28):
+            image = image.resize((28, 28))
         img_array = np.array(image).astype("float32") / 255.0
-        img_array = img_array.reshape((1,28,28,1))
-        return img_array
+    
+    # EMNIST images are rotated 90° and flipped — fix orientation
+    img_array = np.rot90(img_array, k=-1)
+    img_array = np.fliplr(img_array)
+    
+    return img_array.reshape((1, 28, 28, 1))
+
 
 @app.post("/predict")
-async def predict_digit(file: UploadFile = File(...), raw: bool = False):
-    # raw=True means we expect raw MNIST array bytes
+async def predict_character(file: UploadFile = File(...), raw: bool = False):
+    """Predict the handwritten digit or letter from uploaded image"""
     image_data = await file.read()
     preprocessed = preprocess_image(image_data, is_raw=raw)
-    
+
     predictions = model.predict(preprocessed)
-    predicted_digit = int(np.argmax(predictions))
+    pred_idx = int(np.argmax(predictions))
     confidence = float(np.max(predictions))
-    return {"prediction": predicted_digit, "confidence": confidence}
+
+    # Map numeric label to actual character
+    predicted_char = emnist_labels[pred_idx] if pred_idx < len(emnist_labels) else "?"
+
+    return {"prediction": predicted_char, "index": pred_idx, "confidence": confidence}
 
 
 @app.post("/predict_raw")
 async def predict_raw(request: Request):
+    """Handle direct raw 28x28 bytes array input"""
     body = await request.body()
-    img_array = np.frombuffer(body, dtype=np.uint8).reshape((28,28)).astype("float32") / 255.0
-    img_array = img_array.reshape((1,28,28,1))
+    img_array = np.frombuffer(body, dtype=np.uint8).reshape((28, 28)).astype("float32") / 255.0
+    img_array = np.rot90(img_array, k=-1)
+    img_array = np.fliplr(img_array)
+    img_array = img_array.reshape((1, 28, 28, 1))
+
     predictions = model.predict(img_array)
-    return {"prediction": int(np.argmax(predictions)), "confidence": float(np.max(predictions))}
+    pred_idx = int(np.argmax(predictions))
+    confidence = float(np.max(predictions))
+
+    predicted_char = emnist_labels[pred_idx] if pred_idx < len(emnist_labels) else "?"
+
+    return {"prediction": predicted_char, "index": pred_idx, "confidence": confidence}

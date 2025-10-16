@@ -19,8 +19,9 @@ const ImageUploader = () => {
     if (!file) return;
     setLoading(true);
     try {
-      const result = await predictDigit(file);
-      setPrediction(result.prediction);
+      const result = await predictDigit(file); 
+      console.log("API result:", result); 
+      setPrediction(result);
     } catch (error) {
       console.error("Prediction failed:", error);
     } finally {

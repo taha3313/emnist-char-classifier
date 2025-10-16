@@ -1,63 +1,70 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import datasets, layers, models
+from tensorflow.keras import layers, models
 from tensorflow.keras.utils import to_categorical
 from matplotlib import pyplot as plt
+from tensorflow.keras.datasets import mnist
 
-# Load the MNIST dataset
-(train_images, train_labels), (test_images, test_labels) = datasets.mnist.load_data()
+# Import EMNIST from tensorflow_datasets
+import tensorflow_datasets as tfds
 
-# Preprocessing: Normalize the pixel values to be between 0 and 1
-train_images = train_images / 255.0
-test_images = test_images / 255.0
+# Load the EMNIST "byclass" dataset (digits + letters)
+(ds_train, ds_test), ds_info = tfds.load(
+    'emnist/byclass',
+    split=['train', 'test'],
+    shuffle_files=True,
+    as_supervised=True,
+    with_info=True
+)
 
-#Reshape the images to (28,28,1) as they are grayscale
-train_images = train_images.reshape((train_images.shape[0], 28, 28, 1))
-test_images = test_images.reshape((test_images.shape[0], 28, 28, 1))
+# Preprocess function: normalize images and reshape
+def preprocess(image, label):
+    image = tf.cast(image, tf.float32) / 255.0  # Normalize
+    image = tf.expand_dims(image, -1)           # Add channel dimension (28,28,1)
+    return image, label
 
-# Convert labels to one-hot encoded format
-train_labels = to_categorical(train_labels)
-test_labels = to_categorical(test_labels)
+# Apply preprocessing
+ds_train = ds_train.map(preprocess).batch(64).prefetch(tf.data.AUTOTUNE)
+ds_test = ds_test.map(preprocess).batch(64).prefetch(tf.data.AUTOTUNE)
+
+# Get number of classes (should be 62 for EMNIST ByClass)
+num_classes = ds_info.features['label'].num_classes
+print(f"Number of classes: {num_classes}")
 
 # Build the CNN model
-model = models.Sequential()
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+    layers.MaxPooling2D((2, 2)),
 
-# First convolutional layer
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
-model.add(layers.MaxPooling2D((2, 2)))
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
 
-# Second convolutional layer
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2, 2)))
+    layers.Conv2D(64, (3, 3), activation='relu'),
 
-# Third convolutional layer
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    layers.Flatten(),
+    layers.Dense(128, activation='relu'),
+    layers.Dense(num_classes, activation='softmax')  # 62 classes for EMNIST
+])
 
-# Flatten the 3D output to 1D and add dense layers
-model.add(layers.Flatten())
-model.add(layers.Dense(64, activation='relu'))
-
-# Output layer with 10 neurons for 10 classes
-model.add(layers.Dense(10, activation='softmax'))
-
-# Compile the model
+# Compile model
 model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
-                metrics=['accuracy'])
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
 
-# Train the model
-model.fit(train_images, train_labels, epochs=5, batch_size=64, validation_data=(test_images, test_labels))
+# Train model
+model.fit(ds_train, epochs=5, validation_data=ds_test)
 
-# Evaluate the model
-test_loss, test_acc = model.evaluate(test_images, test_labels)
+# Evaluate model
+test_loss, test_acc = model.evaluate(ds_test)
 print(f'Test accuracy: {test_acc * 100:.2f}%')
 
-#Make predictions on test images
-predictions = model.predict(test_images)
-print(f"Predicions for the first test image: {np.argmax(predictions[0])}")
+# Predict example
+for images, labels in ds_test.take(1):
+    preds = model.predict(images)
+    plt.imshow(images[0].numpy().reshape(28, 28), cmap='gray')
+    plt.title(f"Predicted Label: {np.argmax(preds[0])}")
+    plt.show()
 
-plt.imshow(test_images[0].reshape(28, 28), cmap='gray')
-plt.title(f"Predicted Label: {predictions[0].argmax()}")
-plt.show()
-
-model.save("model/mnist_cnn.h5")
+# Save model
+model.save("model/emnist_cnn.h5")
+print("✅ Model saved to model/emnist_cnn.h5")
