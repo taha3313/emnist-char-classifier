@@ -8,6 +8,8 @@ A **handwritten character recognition** web application built with:
 
 The app allows users to upload images and get real-time character predictions.
 
+The repository also includes **train_model.py**, the script I wrote to train the CNN model on the EMNIST dataset.
+
 ---
 
 ## 🛠 Features
@@ -29,6 +31,7 @@ mnist-digit-classifier/
 │  ├─ app.py             # FastAPI backend
 │  ├─ model/
 │  │  └─ emnist_cnn.h5   # Pre-trained CNN model
+│  ├─ train_model.py      # Script to train the CNN model
 │  └─ venv/              # Python virtual environment
 ├─ frontend/
 │  ├─ src/
