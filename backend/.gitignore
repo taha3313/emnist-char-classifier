@@ -17,9 +17,6 @@ __pycache__/
 # Log files
 *.log
 
-# Model files
-*.h5
-
 # IDE / OS files
 .vscode/
 .idea/
