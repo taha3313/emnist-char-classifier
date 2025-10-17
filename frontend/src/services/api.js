@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000"; // FastAPI backend URL
+const API_URL = "https://emnist-char-classifier.onrender.com"; // FastAPI backend URL
 
 export const predictDigit = async (file) => {
   const formData = new FormData();
