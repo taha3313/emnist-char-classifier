@@ -1,9 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from tensorflow.keras.utils import to_categorical
 from matplotlib import pyplot as plt
-from tensorflow.keras.datasets import mnist
 
 # Import EMNIST from tensorflow_datasets
 import tensorflow_datasets as tfds

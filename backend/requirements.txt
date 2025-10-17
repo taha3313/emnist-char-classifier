@@ -6,4 +6,3 @@ uvicorn
 pillow
 python-multipart
 opencv-python
-tensorflow_datasets
