@@ -10,6 +10,8 @@ The app allows users to upload images and get real-time character predictions.
 
 The repository also includes **train_model.py**, the script I wrote to train the CNN model on the EMNIST dataset.
 
+🌐 **Live Demo:** [https://emnist-char-classifier-1.onrender.com](https://emnist-char-classifier-1.onrender.com)
+
 ---
 
 ## 🛠 Features
